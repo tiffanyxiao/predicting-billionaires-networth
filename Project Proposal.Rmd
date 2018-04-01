@@ -1,0 +1,75 @@
+---
+title: "Predicting Billionaire Networth"
+author: "Group-F: Audrey Jiang, Emma Ning, Tiffany Xiao"
+date: "3/21/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose and Motivation
+A topic that interests many is the question of "how does one become a billionaire?", or even more specifically "how does one become the wealthiest billionaire?". This topic is so popular that it is a topic of many studies, including the very popular Forbes World's Billionaires list. Our motivation behind the study is not only personal interest in observing which variables tend to lead to more wealth, but also an interest in studying a social phenomenon in which the global income is increasing slowly, while the cumulation of extreme wealth is growing rapidly<sup>3</sup>.
+
+The purpose of this study is to determine what kind of factors contribute to the wealth of the billionaire, specifically the effect of citizenship, age, source of wealth, industry, region, gender and type of wealth<sup>1</sup>. The study aims to determine which factors are significant in predicting networth, and how they influence networth. Specifically, this study aims to answer the question: <b> "Are citizenship, age, source of wealth, industry, region, gender and type of wealth of a billionaire significantly associated with his or her net worth? If so, how do they influence the networth (positive or negative effect)?" </b>
+
+Our hypothesis is that the variables associated with the billionaire's age, region and gender will play significant roles in predicting his or her net worth. Specifically, we predict that the older a billionaire is, the larger their net worth will be (due to the possibility that they've had more experience or time to accumulate wealth). Region will most likely play a role, as it is likely that it is more difficult for billionaires in certain regions to gain money in other regions (i.e. it may be easier for a person in a wealthy country such as the United States to gain wealth than a person in a poor country). Also, due to gender inequality, it may be likely that females have a lower networth than males.
+
+The results of our study will have implications concerning what factors often predict the greatest amount of wealth. If there are certain industries or sources of wealth that are more profitable than others, this data and study can be used by those interested in maximizing their networth or profits. If age or gender are significant predictors in predicting networth, there are societal implications such as the question of "why gender is associated with networth". Other variables such as citizenship or region of the billionaire can shed light on world economics, and the possible effect of the wealth of a country on its potential in producing billionaires.
+
+# Data
+The dataset that will be used in this study is a data frame collected by researchers at the Peterson Institute for International Economics. The researchers gathered their data by compiling Forbes data on billionaires and their attributes, and supplemented this data with other variables on characteristics of the billionaires and their businesses (from sources such as other firms including Knight Frank and Wealth-X). The dataset focuses solely on billionaires as reported by Forbes World's Billionaires list from 2014.
+
+The dataset includes 30 variables, 5 of which are numerical (`rank`, `networthusbillion`, `age`, `foundingdate`, `gdpcurrentus`) and 25 of which are categorical (`name`, `year`, `citizenship`, `countrycode`, `selfmade`, `typeofwealth`, `gender`, `industry`, `industry/aggregates`, `region`, `north`, `politicalconnection`, `founder`, `generationofinheritance`, `sector`, `company`, `companytype`, `relationshiptocompany`, `sourceofwealth`, `notes`, `notes2`, `source`, `source_2`, `source_3`, `source_4`). 
+
+The dataset contains 1653 observations, all of which will be used in this study. The dataset can be found on the Peterson Institute For International Economic’s website: (https://piie.com/publications/working-papers/origins-superrich-billionaire-characteristics-database?ResearchID=2917). 
+
+# Population
+Each observation in the dataset is a billionaire, as reported by Forbes World’s Billionaires list from 2014. The population of interest is all billionaires on Earth. Currently, there are over 1,500 billionaires worldwide<sup>2</sup>. 
+
+# Response Variable
+Net worth of billionaire in 2014, in current US dollars (variable name in dataset: `networthusbillion`) 
+
+The response variable is the net worth of each billionaire in the unit of US dollars in 2014. Since the billionaires in the dataset all came from the Forbes list, they had to have a net worth of over \$1 billion in a given year (2014 in our case). However, note that our response variable, the net worth, does have a natural zero. Since we are specifically looking at billionaire status, the numerical amount of net worth starts at \$1 billion.
+
+Estimated Range: 1 - 76 billion dollars (Bill Gates was the richest person in 2014 with 76 billion dollars) 
+
+# Explanatory Variables
+
+* Age (variable name in dataset: `age`)
+
+Age refers to the age of the billionaires. It is a continuous numerical variable.
+
+Estimated Range: 24 - 98 years old (The youngest billionaire was reported to be 24, while the oldest living billionaire was reported to be 98) 
+
+* Source of wealth (variable name in dataset: `sourceofwealth`)
+
+This refers to the Forbes-reported source of billionaire wealth. It is a categorical variable.
+
+* Industry (variable name in dataset: `industry`)
+
+Our explanatory variable, industry, will incorporate all the industry labels mentioned in Kaplan and Rauh (2013). 
+
+Industry is a categorical variable with three subcategories: industrial, finance and investments. Industrial category includes: retail/restaurant; technology--computer; technology--medical; consumer; media; diversified/other; energy. Finance and investments categories includes: hedge funds; private equity/LBO; money management; venture capital. Real estate category only includes real estate itself.
+
+* Gender (variable name in dataset: `gender`)
+
+Gender is a binary variable that is 0 for male billionaires and 1 for female billionaires.
+
+* Region (variable name in dataset: `region`)
+
+Region is a categorical variable that divides billionaires into regions based on their country of citizenship. There are 7 sub-categories of region: Anglo; Europe (divided into high income and emerging market); East Asia (divided into high income and emerging market); Latin America; Middle East and North Africa; South Asia; Sub-Saharan Africa.
+
+* Type of wealth (variable name in dataset: `typeofwealth`)
+
+Type of wealth is a categorical variable that divides billionaires into five categories: inherited, self-made founders, self-made executives, politically connected/resource-related, and self-made finance.
+
+* Years of the company's operation (variable name: `yearssincefounding`)
+
+Years of the company's operation is a quantitative variable created for the purpose of this project (it is not included in the original dataset). It is obtained by subtracting the company's founding date (variable name in dataset is `founding date`) from the current year (2014). Billionaires related to government and politics are excluded from our data because their careers do not involve company operations. 
+
+# References
+1. Freund, Caroline, and Sarah Oliver. “The Origins of the Superrich: The Billionaire Characteristics Database.” PIIE, 28 Sept. 2016, piie.com/publications/working-papers/origins-superrich-billionaire-characteristics-database?ResearchID=2917. 
+2. Loudenback, Tanza. “There Are over 1,500 Billionaires Worldwide - Here Are the 14 Countries Where the World's Richest People Live.” Business Insider, Business Insider, 26 Oct. 2017, www.businessinsider.com/how-many-billionaires-world-billionaires-2017-10.
+3. Kaplan, Steven, and Joshua Rauh. 2013. It’s the Market: The Broad-Based Rise in the Return to Top Talent. Journal of Economic Perspectives 27, no. 3: 35-56. 	 	
