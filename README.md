@@ -6,3 +6,7 @@ This project is a statistics project for SDS 291: Multiple Regression (taken Spr
 
 ## sourceofwealth.py
 sourceofwealth.py is a python program written to edit the original dataset (included as "oldBillionaires.csv") to contain a column titled "numsourceofwealth", which is the number of sources of wealth for the billionaire. Originally, we had planned to use the variable `sourceofwealth` to determine if the billionaire's source of wealth has an effect on the billionaire's networth. However, upon discovering that the variable has over 600 levels, we decided to determine the number of sources of wealth instead (the other option would be to arbitrarily group the 600 levels into smaller levels, but would possibly introduce bias). To do this, I wrote a python programming that determines the billionaire's number of sources of wealth (basically by determining how many commas are in the source of wealth column), and writes a new csv file including this comma.
+
+## Project Components
+* Project Proposal - the initial project proposal.
+* Data Appendix - the R code to clean Billionaires.csv. 

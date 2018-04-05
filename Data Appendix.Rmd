@@ -1,0 +1,170 @@
+---
+title: "Data Appendix for Group F"
+author: "Group F: Tiffany Xiao, Emma Ning and Audrey Jiang"
+date: "3/30/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Load the Data and Libraries: 
+First, load the Billionaires data (found here: https://piie.com/publications/working-papers/origins-superrich-billionaire-characteristics-database?ResearchID=2917) and the libraries we will be using.
+
+```{r, message = FALSE}
+library(readr)
+library(tidyr)
+library(dplyr)
+billionaires <- read.csv("Billionaires.csv")
+```
+
+#Remove Years 1996 and 2001
+The dataset includes observations from 1996, 2001 and 2014. However, we only want to look at the observations from the year 2014, so we will remove the years 1996 and 2001 from the dataset. 
+```{r}
+new_billionaires <- billionaires[!(billionaires$year==2001),]
+new_billionaires <- new_billionaires[!(new_billionaires$year==1996),]
+```
+
+#Select Desired Variables
+Now, we want to create a new data frame with the variables we are interested in (`age`, `numsourceofwealth`, `industry`, `gender`, `region`, `typeofwealth`, `foundingdate` and `networthusbillion`).
+```{r}
+new_billionaires <- new_billionaires %>% 
+  select(age,numsourceofwealth,industry,gender,region,typeofwealth, foundingdate,networthusbillion)
+```
+
+Note: Our original project proposal included analysis of `sourceofwealth`, but we discovered (after data exploration) that the variable contained over 600 levels. Instead of arbitrarily regrouping these groups by ourselves (and possibly introducing bias), we decided to create another column in our dataset named `numsourceofwealth` that contains the number of different sources of wealth (based on the `sourceofwealth` column). To do this, Tiffany created a python program which can be found here: https://github.com/tiffanyxiao/predicting-billionaires-networth. Basically, the python program counts the number of commas in the `sourceofwealth` comma and adds one to determine the number of sources of wealth, since sources of wealth are separated by commas in `sourceofwealth`. 
+
+
+
+#Remove NA values
+Now, we will remove observations with NA values for any of the variables we are interested in.
+```{r} 
+removeNA <- function(data, desiredCols) {
+  completeVec <- complete.cases(data[, desiredCols])
+  return(data[completeVec, ])
+}
+
+new_billionaires <- removeNA(new_billionaires, "age")
+new_billionaires <- removeNA(new_billionaires, "numsourceofwealth")
+new_billionaires <- removeNA(new_billionaires, "industry")
+new_billionaires <- removeNA(new_billionaires, "gender")
+new_billionaires <- removeNA(new_billionaires, "region")
+new_billionaires <- removeNA(new_billionaires, "typeofwealth")
+new_billionaires <- removeNA(new_billionaires, "foundingdate")
+new_billionaires2 <- removeNA(new_billionaires, "networthusbillion")
+```
+
+# Create `yearssincefounding` Variable
+We are also interested in looking at the number of years since the founding of the company or organization that is associated with the billionaire. To do this, we created a new variable called `yearssincefounding` which is created by subtracting the billionaire's `foundingdate` from 2014. 
+```{r}
+new_billionaires2$yearssincefounding <- 2014 - new_billionaires2$foundingdate
+```
+
+# Data Exploration 
+Now we will run str() on new_billionaires2. 
+```{r}
+str(new_billionaires2)
+```
+
+First, we can see that the categorical variables (`industry`, `gender`,`region` and `typeofwealth`) have "" and "0" as levels. We need to refactor these variables, and see if these levels remain.
+```{r}
+new_billionaires2$industry <- factor(new_billionaires2$industry)
+new_billionaires2$gender <- factor(new_billionaires2$gender)
+new_billionaires2$region <- factor(new_billionaires2$region)
+new_billionaires2$typeofwealth <- factor(new_billionaires2$typeofwealth)
+str(new_billionaires2)
+```
+
+`yearssincefounding` has type num, when it should be int since the year is always an integer. Let's refactor it.
+```{r}
+# change format of yearssincefounding to an int 
+new_billionaires2$yearssincefounding <- as.integer(new_billionaires2$yearssincefounding)
+```
+
+We can also see that `typeofwealth` has a blank level. After reading the documentation, we determined that this blank level is equivalent to an NA level. We will remove the observations with a blank for the type of wealth. 
+```{r}
+new_billionaires2 <- new_billionaires2[!(is.na(new_billionaires2$typeofwealth) | new_billionaires2$typeofwealth==""), ]
+new_billionaires2$typeofwealth <- factor(new_billionaires2$typeofwealth)
+str(new_billionaires2)
+```
+
+Now the levels "0" and "" are omitted from the factor levels. However, there are some variables with a large amount of levels, such as `industry` (16 levels), `region` (7 levels) and `typeofwealth` (6 levels). To fix this problem, we will regroup these levels into larger categories.
+
+## Regrouping `industry`
+For `industry`, we identified 5 larger categories that the current levels can be regrouped into: 
+
+1.`Service`: includes `Consumer`, `Retail,Restaurant`, `Media`
+
+2.`Industrial`: includes `Construction`,`Mining and metals`, `Non-consumer industrial`
+
+3. `Financial`: includes `Hedge Funds`, `Money management`, `Real estate`, `Venture capital`, `Diversified financial`, `Private equity/leveraged buyout`
+
+4. `Technology`: includes `Technology-computer`; `Energy`; `Technology medical`
+
+5. `Other`: includes the `Other` level
+```{r}
+# regroup the levels
+levels(new_billionaires2$industry) <- list(Service=c("Consumer","Retail, Restaurant", "Media"), Industrial=c("Construction","Mining and metals", "Non-consumer industrial"), Financial=c("Hedge funds", "Money Management", "Real Estate", "Venture Capital", "Diversified financial", "Private equity/leveraged buyout"), Technology=c("Technology-computer", "Energy", "Technology medical"),Other=c("Other"))
+```
+
+We would like to have a smaller amount of levels, and thus decided to regroup into 3 new categories: 
+1. `Service` (same as before)
+2. `Financial` (same as before)
+3. `Technology` (same as before)
+4. `Other`: includes the original `Other` level and `Industrial`
+Note: We selected these 3 industries because of personal interest in seeing their significance, especially since these 3 industries seemed to be the most talked about in today's news. 
+```{r}
+levels(new_billionaires2$industry) <- list(Service=c("Service"), Financial=c("Financial"), Technology=c("Technology"),Other=c("Other","Industrial"))
+new_billionaires2$industry <- factor(new_billionaires2$industry)
+```
+
+As a final step, we would like to output the table for the predictor and review the new levels (and make sure none of the levels have 0 observations in it).
+```{r}
+table(new_billionaires2$industry)
+```
+
+## Regrouping `region`
+For `region`, we identified 4 larger categories that the current levels can be regrouped into: 
+
+1. `Asia`: includes `East Asia` and `South Asia`
+
+2. `Africa`: includes `Middle East/North Africa` and `Sub-sahara Africa`
+
+3. `America`: includes `Latin America` and `North America`
+
+4. `Europe`: includes `Europe`
+```{r}
+# regroup the levels
+levels(new_billionaires2$region) <- list(Asia=c("East Asia","Europe"), Africa=c("Middle East/North Africa","South Africa"), America = c("Latin America", "North America"), Europe = c("Europe") )
+new_billionaires2$region <- factor(new_billionaires2$region)
+```
+
+## Regrouping `typeofwealth`
+For `typeofwealth`, we identified our interest in just self-made billionaires and inherited billionaires (to later test the significance of being a self-made or inherited billionaire). Based on the documentation provided for the data, we identified these groups as: 
+1. `Self-made`: includes `self-made finance` and `founder non-finance`
+
+2. `Inherited`: includes `inherited`
+
+3. `Other`: includes `executive` and `privatized and resources`
+```{r}
+# regroup the levels
+levels(new_billionaires2$typeofwealth) <- list("Self-made" =c("self-made finance","founder non-finance"), Inherited=c("inherited"), Other = c("executive", "privatized and resources"))
+new_billionaires2$typeofwealth <- factor(new_billionaires2$typeofwealth)
+```
+
+## Checking str(new_billionaires2) again 
+Next, we will check that the new levels have been correctly regrouped. 
+```{r}
+str(new_billionaires2)
+```
+
+All the formats of each variable look appropriate.  
+
+# Write the CSV file 
+Now that we've cleaned the csv file, let's write the new csv file. 
+```{r}
+write.csv(new_billionaires2, "group-F-data.csv", row.names = FALSE)
+```
+
+
